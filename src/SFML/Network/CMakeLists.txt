@@ -50,7 +50,7 @@ if(SFML_OS_WINDOWS)
     target_link_libraries(sfml-network PRIVATE Crypt32 ws2_32)
 endif()
 
-if(SFML_USE_SYSTEM_DEPS)
+if(SFML_USE_SYSTEM_MBEDTLS)
     find_package(MbedTLS REQUIRED)
 else()
     # use a block to scope option variables we have to set
