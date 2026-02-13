@@ -50,9 +50,6 @@
 #include <cassert>
 #include <cstring>
 
-#define SF_GLAD_EGL_IMPLEMENTATION
-#include <glad/egl.h>
-
 
 extern int main(int argc, char* argv[]);
 
@@ -326,9 +323,6 @@ void onDestroy(ANativeActivity* activity)
 
     states.mutex.unlock();
 
-    // Terminate EGL display
-    eglTerminate(states.display);
-
     // Delete our allocated states
     delete &states;
 
@@ -347,8 +341,12 @@ void onNativeWindowCreated(ANativeActivity* activity, ANativeWindow* window)
     // Update the activity states
     states.window = window;
 
-    // Notify SFML mechanism
-    states.forwardEvent(sf::Event::FocusGained{});
+    // If we have no context it's during window creation so don't send the focus event or it will try
+    // to recreate the surface again
+    if (states.context)
+    {
+        states.forwardEvent(sf::Event::FocusGained{});
+    }
 
     // Wait for the event to be taken into account by SFML
     states.updated = false;
@@ -498,9 +496,6 @@ JNIEXPORT void ANativeActivity_onCreate(ANativeActivity* activity, void* savedSt
     for (auto& isButtonPressed : states->isButtonPressed)
         isButtonPressed = false;
 
-    gladLoaderLoadEGL(EGL_DEFAULT_DISPLAY);
-    states->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
     if (savedState != nullptr)
     {
         const auto* begin = static_cast<const std::byte*>(savedState);
@@ -544,9 +539,6 @@ JNIEXPORT void ANativeActivity_onCreate(ANativeActivity* activity, void* savedSt
 
     // Keep the screen turned on and bright
     ANativeActivity_setWindowFlags(activity, AWINDOW_FLAG_KEEP_SCREEN_ON, AWINDOW_FLAG_KEEP_SCREEN_ON);
-
-    // Initialize the display
-    eglInitialize(states->display, nullptr, nullptr);
 
     getScreenSizeInPixels(*activity, states->screenSize.x, states->screenSize.y);
     getFullScreenSizeInPixels(*activity, states->fullScreenSize.x, states->fullScreenSize.y);

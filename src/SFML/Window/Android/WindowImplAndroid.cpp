@@ -114,6 +114,12 @@ void WindowImplAndroid::processEvents()
     ActivityStates&       states = getActivity();
     const std::lock_guard lock(states.mutex);
 
+    if (m_windowBeingCreated)
+    {
+        states.context->createSurface(states.window);
+        m_windowBeingCreated = false;
+    }
+
     if (m_windowBeingDestroyed)
     {
         states.context->destroySurface();
@@ -240,7 +246,8 @@ void WindowImplAndroid::forwardEvent(const Event& event)
         {
             WindowImplAndroid::singleInstance->m_size = Vector2u(
                 Vector2i(ANativeWindow_getWidth(states.window), ANativeWindow_getHeight(states.window)));
-            WindowImplAndroid::singleInstance->m_hasFocus = true;
+            WindowImplAndroid::singleInstance->m_windowBeingCreated = true;
+            WindowImplAndroid::singleInstance->m_hasFocus           = true;
         }
         else if (event.is<Event::FocusLost>())
         {
@@ -830,6 +837,12 @@ char32_t WindowImplAndroid::getUnicode(AInputEvent* event)
     const jint  scancode  = AKeyEvent_getScanCode(event);
     const jint  flags     = AKeyEvent_getFlags(event);
     const jint  source    = AInputEvent_getSource(event);
+
+    // Backspace doesn't have a unicode char, so we generate '\b' for consistency with other platforms
+    if (code == AKEYCODE_DEL)
+    {
+        return '\b';
+    }
 
     // Construct a KeyEvent object from the event data
     jclass    classKeyEvent       = lJNIEnv->FindClass("android/view/KeyEvent");
