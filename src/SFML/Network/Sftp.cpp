@@ -851,7 +851,7 @@ Sftp::PathResult Sftp::resolvePath(const std::filesystem::path& path, const Time
         [&]
         {
             return libssh2_sftp_symlink_ex(m_impl->sftpSession.get(),
-                                           reinterpret_cast<const char*>(pathString.data()),
+                                           pathString.data(),
                                            static_cast<unsigned int>(pathString.size()),
                                            buffer.data(),
                                            static_cast<unsigned int>(buffer.size()),
@@ -893,7 +893,7 @@ Sftp::AttributesResult Sftp::getAttributes(const std::filesystem::path& path, bo
         [&]
         {
             return libssh2_sftp_stat_ex(m_impl->sftpSession.get(),
-                                        reinterpret_cast<const char*>(pathString.data()),
+                                        pathString.data(),
                                         static_cast<unsigned int>(pathString.size()),
                                         followLinks ? LIBSSH2_SFTP_STAT : LIBSSH2_SFTP_LSTAT,
                                         &attributes);
@@ -921,7 +921,7 @@ Sftp::ListingResult Sftp::getDirectoryListing(const std::filesystem::path& path,
             [&]
             {
                 handle = libssh2_sftp_open_ex(m_impl->sftpSession.get(),
-                                              reinterpret_cast<const char*>(pathString.data()),
+                                              pathString.data(),
                                               static_cast<unsigned int>(pathString.size()),
                                               0,
                                               0,
@@ -994,7 +994,7 @@ Sftp::Result Sftp::createDirectory(const std::filesystem::path& path,
         [&]
         {
             return libssh2_sftp_mkdir_ex(m_impl->sftpSession.get(),
-                                         reinterpret_cast<const char*>(pathString.data()),
+                                         pathString.data(),
                                          static_cast<unsigned int>(pathString.size()),
                                          makePermissions(permissions));
         },
@@ -1018,7 +1018,7 @@ Sftp::Result Sftp::deleteDirectory(const std::filesystem::path& path, const Time
         [&]
         {
             return libssh2_sftp_rmdir_ex(m_impl->sftpSession.get(),
-                                         reinterpret_cast<const char*>(pathString.data()),
+                                         pathString.data(),
                                          static_cast<unsigned int>(pathString.size()));
         },
         timeout);
@@ -1057,17 +1057,17 @@ Sftp::Result Sftp::rename(const std::filesystem::path& oldPath,
                 if (usePosix)
                 {
                     return libssh2_sftp_posix_rename_ex(m_impl->sftpSession.get(),
-                                                        reinterpret_cast<const char*>(oldPathString.data()),
+                                                        oldPathString.data(),
                                                         static_cast<unsigned int>(oldPathString.size()),
-                                                        reinterpret_cast<const char*>(newPathString.data()),
+                                                        newPathString.data(),
                                                         static_cast<unsigned int>(newPathString.size()));
                 }
 #endif
 
                 return libssh2_sftp_rename_ex(m_impl->sftpSession.get(),
-                                              reinterpret_cast<const char*>(oldPathString.data()),
+                                              oldPathString.data(),
                                               static_cast<unsigned int>(oldPathString.size()),
-                                              reinterpret_cast<const char*>(newPathString.data()),
+                                              newPathString.data(),
                                               static_cast<unsigned int>(newPathString.size()),
                                               overwrite ? LIBSSH2_SFTP_RENAME_OVERWRITE : 0);
             },
@@ -1102,7 +1102,7 @@ Sftp::Result Sftp::deleteFile(const std::filesystem::path& path, const TimeoutWi
         [&]
         {
             return libssh2_sftp_unlink_ex(m_impl->sftpSession.get(),
-                                          reinterpret_cast<const char*>(pathString.data()),
+                                          pathString.data(),
                                           static_cast<unsigned int>(pathString.size()));
         },
         timeout);
@@ -1135,7 +1135,7 @@ Sftp::Result Sftp::download(const std::filesystem::path&                        
             [&]
             {
                 if (handle = libssh2_sftp_open_ex(m_impl->sftpSession.get(),
-                                                  reinterpret_cast<const char*>(pathString.data()),
+                                                  pathString.data(),
                                                   static_cast<unsigned int>(pathString.size()),
                                                   LIBSSH2_FXF_READ,
                                                   0,
@@ -1252,7 +1252,7 @@ Sftp::Result Sftp::upload(const std::filesystem::path&                          
             [&]
             {
                 if (handle = libssh2_sftp_open_ex(m_impl->sftpSession.get(),
-                                                  reinterpret_cast<const char*>(pathString.data()),
+                                                  pathString.data(),
                                                   static_cast<unsigned int>(pathString.size()),
                                                   static_cast<unsigned int>(LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT |
                                                                             (truncate ? LIBSSH2_FXF_TRUNC : 0) |
