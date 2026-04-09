@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2025 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2026 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -37,6 +37,10 @@
 #endif
 
 #define QOI_IMPLEMENTATION
+#define qoi_decode sf_qoi_decode
+#define qoi_encode sf_qoi_encode
+#define qoi_read   sf_qoi_read
+#define qoi_write  sf_qoi_write
 #include <qoi.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

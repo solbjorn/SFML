@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2025 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2026 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -33,6 +33,7 @@
 
 #include <SFML/System/Err.hpp>
 #include <SFML/System/String.hpp>
+#include <SFML/System/Version.hpp>
 
 #include <mbedtls/version.h>
 #if (MBEDTLS_VERSION_MAJOR < 4)
@@ -154,6 +155,36 @@ bool loadSystemCertificates([[maybe_unused]] mbedtls_x509_crt* x509crt, [[maybe_
     return loadStore("ROOT") && loadStore("CA");
 #elif (defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_ANDROID) || defined(SFML_SYSTEM_FREEBSD) || \
        defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD))
+#if defined(SFML_CA_PATH)
+    if (!std::filesystem::exists(SFML_CA_PATH))
+    {
+        sf::err() << "Failed to load CA certificates: " << SFML_CA_PATH << " does not exist" << std::endl;
+        return false;
+    }
+
+    int result{};
+
+    if (std::filesystem::is_directory(SFML_CA_PATH))
+    {
+        result = mbedtls_x509_crt_parse_path(x509crt, SFML_CA_PATH);
+    }
+    else
+    {
+        result = mbedtls_x509_crt_parse_file(x509crt, SFML_CA_PATH);
+    }
+
+    if (result < 0)
+    {
+        sf::err() << "Failed to load CA certificates from " << SFML_CA_PATH << ": " << tlsErrorString(result) << std::endl;
+        return false;
+    }
+    else if (result > 0)
+    {
+        sf::err() << result << " certificates failed to load from " << SFML_CA_PATH << std::endl;
+    }
+
+    return true;
+#else
     auto loadStore = [&](const char* path)
     {
         // Just trying to load all known paths is simpler than specifying paths per distribution
@@ -182,6 +213,7 @@ bool loadSystemCertificates([[maybe_unused]] mbedtls_x509_crt* x509crt, [[maybe_
     return loadStore("/etc/ssl/");
 #elif defined(SFML_SYSTEM_NETBSD)
     return loadStore("/etc/openssl/certs");
+#endif
 #endif
 #elif defined(SFML_SYSTEM_MACOS)
     auto loadStore = [&](SecTrustSettingsDomain domain)
@@ -320,12 +352,8 @@ struct MbedTlsSharedState
         mbedtls_ctr_drbg_init(&ctrDrbgContext);
 
         // We use a personalization string as a cheap way to minimally seed the RNG in case entropy is low
-#define SFML_NUMBER_TO_STRING_HELPER(x) #x
-#define SFML_NUMBER_TO_STRING(x)        SFML_NUMBER_TO_STRING_HELPER(x)
-
-        static constexpr std::string_view
-            personalizationString = "sfml-network-" SFML_NUMBER_TO_STRING(SFML_VERSION_MAJOR) "." SFML_NUMBER_TO_STRING(
-            SFML_VERSION_MINOR) "." SFML_NUMBER_TO_STRING(SFML_VERSION_PATCH) "-mbedtls-" MBEDTLS_VERSION_STRING_FULL;
+        static const auto personalizationString = "sfml-network-" + std::string(sf::version().string) +
+                                                  "-mbedtls-" MBEDTLS_VERSION_STRING_FULL;
 
         if (auto result = mbedtls_ctr_drbg_seed(&ctrDrbgContext,
                                                 mbedtls_entropy_func,
