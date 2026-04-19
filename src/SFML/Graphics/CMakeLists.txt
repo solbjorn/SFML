@@ -141,7 +141,7 @@ else()
 
         FetchContent_Declare(Freetype
             GIT_REPOSITORY https://github.com/freetype/freetype.git
-            GIT_TAG VER-2-13-2
+            GIT_TAG VER-2-14-3
             GIT_SHALLOW ON
             OVERRIDE_FIND_PACKAGE
             # patch out parts we don't want of the FreeType CMake configuration
@@ -150,12 +150,15 @@ else()
             PATCH_COMMAND ${CMAKE_COMMAND} -DFREETYPE_DIR=${FETCHCONTENT_BASE_DIR}/freetype-src -P ${PROJECT_SOURCE_DIR}/tools/freetype/PatchFreetype.cmake)
 
         set(HB_BUILD_SUBSET OFF)
+        set(HB_BUILD_RASTER OFF)
+        set(HB_BUILD_VECTOR OFF)
+        set(HB_BUILD_GPU OFF)
         set(HB_HAVE_FREETYPE ON)
         set(HB_HAVE_CORETEXT OFF)
 
         FetchContent_Declare(HarfBuzz
             GIT_REPOSITORY https://github.com/harfbuzz/harfbuzz.git
-            GIT_TAG 10.2.0
+            GIT_TAG 14.1.0
             GIT_SHALLOW ON
             OVERRIDE_FIND_PACKAGE
             # patch out parts we don't want of the HarfBuzz CMake configuration

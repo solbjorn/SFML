@@ -95,7 +95,7 @@ else()
 
         FetchContent_Declare(ogg
             GIT_REPOSITORY https://github.com/xiph/ogg.git
-            GIT_TAG v1.3.5
+            GIT_TAG v1.3.6
             GIT_SHALLOW ON
             # patch out parts we don't want of the Ogg CMake configuration
             # - installing headers & pkgconfig files
@@ -103,7 +103,7 @@ else()
             PATCH_COMMAND ${CMAKE_COMMAND} -DOGG_DIR=${FETCHCONTENT_BASE_DIR}/ogg-src -P ${PROJECT_SOURCE_DIR}/tools/ogg/PatchOgg.cmake)
         FetchContent_Declare(flac
             GIT_REPOSITORY https://github.com/xiph/flac.git
-            GIT_TAG 1.4.3
+            GIT_TAG 1.5.0
             GIT_SHALLOW ON
             # patch out parts we don't want of the FLAC CMake configuration:
             # - adding unnecessary libraries that aren't even used

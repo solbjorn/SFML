@@ -29,7 +29,7 @@
 // SFML version
 ////////////////////////////////////////////////////////////
 #define SFML_VERSION_MAJOR      3
-#define SFML_VERSION_MINOR      1
+#define SFML_VERSION_MINOR      2
 #define SFML_VERSION_PATCH      0
 #define SFML_VERSION_IS_RELEASE false
 
